@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html class="dark">
+<head>
+    <title>Email Scheduler</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* Dark brown background and white text */
+      body { background: #3E2723; color: #fff; }
+      /* Card style for form and lists */
+      .form-card { background: rgba(255,255,255,0.04); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.06); }
+      /* Inputs and text areas */
+      input, textarea, select { background: rgba(255,255,255,0.03) !important; color: #fff !important; border-color: rgba(255,255,255,0.08) !important; }
+      /* Ensure most text is white */
+      input, textarea, select, label, p, h1, h2, h3, span, button { color: #fff !important; }
+      /* Button colors: amber and blue */
+      .btn-amber { background-color: #f59e0b; color: #fff; }
+      .btn-amber:hover { background-color: #d97706; }
+      .btn-amber-blue { background: linear-gradient(90deg,#f59e0b,#2563eb); color: #fff; }
+      .btn-blue { background-color: #2563eb; color: #fff; }
+      /* Toasts */
+      #toastContainer * { color: #fff !important; }
+    </style>
+</head>
+<body class="min-h-screen py-8 px-3">
+<div class="max-w-5xl mx-auto">
+    <div class="text-center mb-6">
+        <h1 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-1 flex items-center justify-center gap-2">
+            <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+            Email Scheduler
+        </h1>
+        <p class="text-base text-slate-600 dark:text-slate-300">Email Schedular</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="form-card rounded-2xl shadow-md p-5">
+            <form id="emailForm" class="space-y-3">
+                <div>
+                    <label for="to" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1 flex items-center gap-1">
+                        <span class="text-red-500 font-bold">*</span>
+                        To
+                    </label>
+                    <input type="email" id="to" required
+                           class="w-full p-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white/50 dark:bg-slate-700/50 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-sm"
+                           placeholder="recipient@example.com" aria-describedby="to-error">
+                    <p id="to-error" class="text-xs text-red-500 mt-1 hidden" role="alert"></p>
+                </div>
+
+                <div>
+                    <label for="subject" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">Subject</label>
+                    <input type="text" id="subject"
+                           class="w-full p-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white/50 dark:bg-slate-700/50 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-sm"
+                           placeholder="Email subject">
+                </div>
+
+                <div>
+                    <label for="body" class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">Body</label>
+                    <textarea id="body" rows="3"
+                              class="w-full p-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white/50 dark:bg-slate-700/50 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-vertical text-sm"
+                              placeholder="Email content"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">Schedule</label>
+                    <div class="flex gap-1 mb-2">
+                        <button type="button" id="sendNow" class="flex-1 btn-amber font-medium py-2 px-3 rounded-lg shadow transition duration-200 flex items-center justify-center gap-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            <span>Send Now</span>
+                            <svg class="w-4 h-4 animate-spin hidden" id="sendNow-spinner" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="flex items-center mb-2">
+                        <div class="flex-1 h-px bg-slate-200 dark:bg-slate-600"></div>
+                        <span class="px-2 text-[10px] text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">or</span>
+                        <div class="flex-1 h-px bg-slate-200 dark:bg-slate-600"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label for="scheduleDate" class="block text-xs text-slate-600 dark:text-slate-300 mb-1 flex items-center gap-1">
+                                <svg class="w-3 h-3 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                Date
+                            </label>
+                            <input type="date" id="scheduleDate" class="w-full p-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white/50 dark:bg-slate-700/50 focus:ring-2 focus:ring-indigo-500 text-sm">
+                        </div>
+                        <div>
+                            <label for="scheduleTime" class="block text-xs text-slate-600 dark:text-slate-300 mb-1 flex items-center gap-1">
+                                <svg class="w-3 h-3 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                Time
+                            </label>
+                            <input type="time" id="scheduleTime" class="w-full p-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-white/50 dark:bg-slate-700/50 focus:ring-2 focus:ring-indigo-500 text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit"
+                        class="w-full btn-amber-blue font-bold py-2 px-4 rounded-xl shadow hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2">
+                    <span>Schedule & Queue</span>
+                    <svg class="w-4 h-4 animate-spin hidden" id="submit-spinner" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </button>
+            </form>
+
+            <div id="status" class="mt-4"></div>
+        </div>
+
+        <div class="form-card rounded-2xl shadow-md p-5 flex flex-col">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-base font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    Scheduled Emails
+                    <span id="email-count" class="text-xs bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 px-1.5 py-0.5 rounded-full"></span>
+                </h2>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1" id="auto-refresh-indicator">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        auto-refresh
+                    </span>
+                    <button id="refresh-history" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+                            <div id="history" class="space-y-2 flex-1 overflow-y-auto">
+                                <p class="text-sm text-slate-500 dark:text-slate-400">No scheduled emails</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="toastContainer" class="fixed top-4 right-4 space-y-2 z-50"></div>
+
+<div id="confirmModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 max-w-sm mx-4">
+        <h3 id="modal-title" class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2">Confirm Send</h3>
+        <p id="modal-message" class="text-sm text-slate-600 dark:text-slate-300 mb-4"></p>
+        <div class="flex gap-2">
+            <button id="modal-cancel" class="flex-1 px-4 py-2 rounded-lg btn-amber font-medium transition-colors text-sm">
+                Cancel
+            </button>
+            <button id="modal-confirm" class="flex-1 px-4 py-2 rounded-lg btn-blue font-medium transition-colors text-sm">
+                Confirm
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const TOAST_DURATION = 4000;
+        const TOAST_EXIT_DELAY = 300;
+        const BUTTON_RING_DURATION = 1000;
+        const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const AUTO_REFRESH_INTERVAL = 5000;
+
+        const toInput = document.getElementById('to');
+        const subjectInput = document.getElementById('subject');
+        const bodyInput = document.getElementById('body');
+        const sendNowBtn = document.getElementById('sendNow');
+        const dateInput = document.getElementById('scheduleDate');
+        const timeInput = document.getElementById('scheduleTime');
+        const emailForm = document.getElementById('emailForm');
+        const toastContainer = document.getElementById('toastContainer');
+        const historyContainer = document.getElementById('history');
+        const refreshBtn = document.getElementById('refresh-history');
+        const emailCount = document.getElementById('email-count');
+        const confirmModal = document.getElementById('confirmModal');
+        const modalMessage = document.getElementById('modal-message');
+        const modalConfirm = document.getElementById('modal-confirm');
+        const modalCancel = document.getElementById('modal-cancel');
+
+        let pendingConfirm = null;
+        let autoRefreshTimer = null;
+
+        toInput.value = '';
+        subjectInput.value = '';
+        bodyInput.value = '';
+
+        const today = new Date();
+        const todayStr = today.toISOString().slice(0, 10);
+        dateInput.value = todayStr;
+        dateInput.min = todayStr;
+        timeInput.value = today.toTimeString().slice(0, 5);
+
+        function formatScheduledTime(dateStr, timeStr) {
+            if (!dateStr || !timeStr) return '';
+            const scheduled = new Date(`${dateStr}T${timeStr}`);
+            const now = new Date();
+            const diffMs = scheduled - now;
+
+            if (diffMs <= 0) return 'Now';
+
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMins / 60);
+            const diffDays = Math.floor(diffHours / 24);
+
+            if (diffMins < 1) return 'Less than a minute';
+            if (diffMins < 60) return `In ${diffMins} minute${diffMins > 1 ? 's' : ''}`;
+            if (diffHours < 24) return `In ${diffHours} hour${diffHours > 1 ? 's' : ''}`;
+
+            return `Tomorrow at ${scheduled.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
+        }
+
+        function showToast(message, type = 'info') {
+            const id = 'toast-' + Date.now();
+            const bgColor = {
+                success: 'bg-emerald-500',
+                error: 'bg-red-500',
+                info: 'bg-blue-500'
+            }[type];
+
+            const toast = document.createElement('div');
+            toast.id = id;
+            toast.className = `p-3 rounded-xl shadow-2xl text-white max-w-sm transform translate-x-full transition-all duration-300 ${bgColor} text-sm`;
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'polite');
+            toast.innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : '⏳'}</span>
+                    <span>${message}</span>
+                </div>
+            `;
+
+            toastContainer.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.remove('translate-x-full'));
+
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+                setTimeout(() => toast.remove(), TOAST_EXIT_DELAY);
+            }, TOAST_DURATION);
+        }
+
+        function showInlineError(fieldId, message) {
+            const errorEl = document.getElementById(`${fieldId}-error`);
+            if (message) {
+                errorEl.textContent = message;
+                errorEl.classList.remove('hidden');
+                document.getElementById(fieldId).classList.add('border-red-500', 'focus:ring-red-500', 'focus:border-red-500');
+            } else {
+                errorEl.classList.add('hidden');
+                document.getElementById(fieldId).classList.remove('border-red-500', 'focus:ring-red-500', 'focus:border-red-500');
+            }
+        }
+
+        function validateForm() {
+            const to = toInput.value.trim();
+            let isValid = true;
+
+            if (!to) {
+                showInlineError('to', 'Please fill the "To" field');
+                isValid = false;
+            } else if (!EMAIL_REGEX.test(to)) {
+                showInlineError('to', 'Please enter a valid email address');
+                isValid = false;
+            } else {
+                showInlineError('to', '');
+            }
+
+            return isValid;
+        }
+
+        function calculateDelayInMillis() {
+            const scheduledDateTime = new Date(`${dateInput.value}T${timeInput.value}`);
+            const now = new Date();
+            const diffMs = scheduledDateTime - now;
+
+            if (diffMs <= 0) {
+                throw new Error('Please select a future date/time');
+            }
+            return diffMs;
+        }
+
+        function setButtonsLoading(loading) {
+            sendNowBtn.disabled = loading;
+            document.querySelector('button[type="submit"]').disabled = loading;
+            document.getElementById('sendNow-spinner').classList.toggle('hidden', !loading);
+            document.getElementById('submit-spinner').classList.toggle('hidden', !loading);
+            sendNowBtn.querySelector('span').classList.toggle('hidden', loading);
+        }
+
+        async function handleSubmit(delayInMillis = null, isConfirmed = false) {
+            if (!validateForm()) return false;
+
+            try {
+                let finalDelay = delayInMillis;
+                if (finalDelay === null) {
+                    finalDelay = calculateDelayInMillis();
+                }
+
+                const formData = {
+                    to: toInput.value,
+                    subject: subjectInput.value,
+                    body: bodyInput.value,
+                    delayInMillis: finalDelay
+                };
+
+                if (!isConfirmed) {
+                    const delayText = finalDelay === 0 ? 'Immediate delivery' : formatScheduledTime(dateInput.value, timeInput.value);
+                    pendingConfirm = { formData, delayInMillis: finalDelay };
+                    modalMessage.textContent = `Send to ${formData.to} ${delayText ? `(${delayText})` : ''}?`;
+                    confirmModal.classList.remove('hidden');
+                    return false;
+                }
+
+                showToast('Scheduling email...', 'info');
+                setButtonsLoading(true);
+
+                const res = await fetch('/api/scheduled-emails', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(formData)
+                });
+
+                if (!res.ok) {
+                    throw new Error(`Server error: ${res.status}`);
+                }
+
+                const delayText = finalDelay === 0 ? 'Immediate delivery' : formatScheduledTime(dateInput.value, timeInput.value);
+                showToast(`Email queued! ${delayText}`, 'success');
+
+                subjectInput.value = '';
+                bodyInput.value = '';
+                showInlineError('to', '');
+                loadHistory();
+
+            } catch (error) {
+                showToast(error.message, 'error');
+            } finally {
+                setButtonsLoading(false);
+            }
+            return true;
+        }
+
+        modalConfirm.addEventListener('click', async () => {
+            confirmModal.classList.add('hidden');
+            if (pendingConfirm) {
+                await handleSubmit(pendingConfirm.delayInMillis, true);
+                pendingConfirm = null;
+            }
+        });
+
+        modalCancel.addEventListener('click', () => {
+            confirmModal.classList.add('hidden');
+            pendingConfirm = null;
+        });
+
+        confirmModal.addEventListener('click', (e) => {
+            if (e.target === confirmModal) {
+                confirmModal.classList.add('hidden');
+                pendingConfirm = null;
+            }
+        });
+
+        let isSubmitting = false;
+        async function debouncedSubmit(delayInMillis = null) {
+            if (isSubmitting) return;
+            isSubmitting = true;
+
+            try {
+                await handleSubmit(delayInMillis, true);
+            } finally {
+                setTimeout(() => { isSubmitting = false; }, 1000);
+            }
+        }
+
+        sendNowBtn.addEventListener('click', () => {
+            sendNowBtn.classList.add('ring-2', 'ring-emerald-400');
+            debouncedSubmit(0);
+            setTimeout(() => sendNowBtn.classList.remove('ring-2', 'ring-emerald-400'), BUTTON_RING_DURATION);
+        });
+
+        emailForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await handleSubmit();
+        });
+
+        async function loadHistory() {
+            try {
+                const res = await fetch('/api/scheduled-emails');
+                if (!res.ok) throw new Error('Failed to load history');
+                const emails = await res.json();
+
+                emailCount.textContent = emails.length > 0 ? emails.length : '';
+
+                if (emails.length === 0) {
+                    historyContainer.innerHTML = '<p class="text-xs text-slate-500 dark:text-slate-400">No scheduled emails</p>';
+                    return;
+                }
+
+                historyContainer.innerHTML = emails.map(email => `
+                    <div class="p-2 rounded-lg bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">${escapeHtml(email.to)}</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 truncate">${escapeHtml(email.subject || '(no subject)')}</p>
+                                <p class="text-xs text-indigo-600 dark:text-indigo-400 mt-1">Scheduled: ${formatDateTime(email.createdAt, email.delayInMillis)}</p>
+                            </div>
+                            <button onclick="cancelEmail('${email.id}')" class="ml-2 p-1.5 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors" title="Cancel">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Failed to load history:', error);
+            }
+        }
+
+        function formatDateTime(createdAt, delayInMillis) {
+            const created = new Date(createdAt);
+            const scheduled = new Date(created.getTime() + delayInMillis);
+            const now = new Date();
+            const diffMs = scheduled - now;
+
+            if (diffMs <= 0) return 'Now';
+
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMins / 60);
+            const diffDays = Math.floor(diffHours / 24);
+
+            if (diffMins < 1) return 'Less than a minute';
+            if (diffMins < 60) return `in ${diffMins}m`;
+            if (diffHours < 24) return `in ${diffHours}h`;
+            return `in ${diffDays}d`;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        window.cancelEmail = async function(id) {
+            try {
+                const res = await fetch(`/api/scheduled-emails/${id}`, { method: 'DELETE' });
+                if (res.status === 409) {
+                    showToast('Cannot cancel — email already sent or processed', 'error');
+                    loadHistory();
+                    return;
+                }
+                if (!res.ok) throw new Error('Failed to cancel');
+                showToast('Email cancelled', 'success');
+                loadHistory();
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        };
+
+        refreshBtn.addEventListener('click', loadHistory);
+
+        loadHistory();
+        autoRefreshTimer = setInterval(loadHistory, AUTO_REFRESH_INTERVAL);
+    })();
+</script>
+</body>
+</html>

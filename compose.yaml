@@ -1,0 +1,45 @@
+services:
+
+  activemq:
+    image: 'apache/activemq-classic:6.2.0'
+    container_name: 'activemq'
+    restart: 'unless-stopped'
+    ports:
+      - '61616:61616'
+      - '8161:8161'
+    volumes:
+      - './activemq/activemq.xml:/opt/apache-activemq/conf/activemq.xml'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-u", "admin:admin", "http://localhost:8161/"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
+  mailpit:
+    image: 'axllent/mailpit:v1.30.5'
+    container_name: 'mailpit'
+    restart: 'unless-stopped'
+    ports:
+      - '1025:1025'
+      - '8025:8025'
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "8025"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
+  postgres:
+    image: 'postgres:18.4'
+    container_name: 'postgres'
+    restart: 'unless-stopped'
+    ports:
+      - '5432:5432'
+    environment:
+      - 'POSTGRES_DB=emaildb'
+      - 'POSTGRES_PASSWORD=postgres'
+      - 'POSTGRES_USER=postgres'
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "emaildb"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
