@@ -3,20 +3,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.mirfanarshad</groupId>
-        <artifactId>spring-boot-email</artifactId>
+        <groupId>com.mirfanarshad.boot</groupId>
+        <artifactId>spring-boot-email-schedualer</artifactId>
         <version>1.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>mail-scheduler</artifactId>
     <name>mail-scheduler</name>
-    <description/>
-    <scm>
-        <connection/>
-        <developerConnection/>
-        <tag/>
-        <url/>
-    </scm>
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>

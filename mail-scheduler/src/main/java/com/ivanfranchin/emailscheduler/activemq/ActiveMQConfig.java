@@ -13,7 +13,7 @@ import org.springframework.jms.annotation.EnableJms;
 public class ActiveMQConfig {
 
   private static final List<String> TRUSTED_PACKAGES =
-      List.of("java.time", "com.ivanfranchin.emailscheduler.email.event");
+      List.of("java.time", "com.mirfanarshad.emailscheduler.email.event");
 
   @Bean
   ConnectionFactory connectionFactory(@Value("${spring.activemq.broker-url}") String brokerURL) {
